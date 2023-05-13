@@ -1,0 +1,32 @@
+@import './mixins';
+@import './variables';
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background-color: $bg-dark-blue;
+	font-size: 16px;
+}
+
+a {
+	@include reset-link;
+}
+
+button {
+	@include reset-button;
+}
+
+main {
+	.gradient-text {
+	}
+	.gradient-header {
+		@include gradient-text($gradient-header);
+		font-weight: 700;
+		font-size: 4rem;
+		filter: contrast(0.8);
+	}
+}
