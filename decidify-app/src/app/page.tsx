@@ -1,4 +1,5 @@
 import '@/styles/pages/landing-page.scss';
+import Link from 'next/link';
 
 export default function LandingPage() {
 	return (
@@ -8,7 +9,9 @@ export default function LandingPage() {
 				Stop second-guessing and start deciding! Create your own
 				<b> FREE anonymous</b> polls and let the people decide!
 			</p>
-			<button className='create-poll-btn'>Let&apos;s create a poll</button>
+			<Link role='button' href='/new-poll' className='create-poll-btn'>
+				Let&apos;s create a poll
+			</Link>
 		</main>
 	);
 }
