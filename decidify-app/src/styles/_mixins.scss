@@ -1,0 +1,17 @@
+@mixin gradient-text($gradient-color) {
+	display: inline;
+	background: $gradient-color;
+	-webkit-text-fill-color: transparent;
+	-webkit-background-clip: text;
+}
+
+@mixin reset-button {
+	border: none;
+	outline: none;
+}
+
+@mixin reset-link {
+	text-decoration: none;
+	color: unset;
+}
+
