@@ -29,9 +29,17 @@
 			background-color: #16182c;
 			color: rgba($button-text-gradient, 0.9);
 			font-weight: 500;
-
+			&.error {
+				border: 2px solid #680808;
+			}
 			&::placeholder {
 				color: rgba($button-text-gradient, 0.5);
+			}
+
+			&:-webkit-autofill {
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: #cacaed;
+				caret-color: #fff;
 			}
 		}
 
@@ -45,14 +53,17 @@
 				border-right: none;
 			}
 			.btn-round {
+				&.error {
+					border: 2px solid #680808;
+					border-left: none;
+				}
 				@include reset-button;
 				background: #5d0d60;
 				border-top-right-radius: 8px;
 				border-bottom-right-radius: 8px;
-				height: 100%;
-				width: 100%;
-				padding: 20%;
+				color: $button-text-gradient;
 				cursor: pointer;
+				font-weight: 700;
 			}
 		}
 	}
@@ -71,8 +82,13 @@
 		width: 100%;
 		cursor: pointer;
 		margin-top: 10px;
-		&:hover {
+		&:not(:disabled):hover {
 			filter: brightness(1.4);
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
 		}
 	}
 
@@ -88,7 +104,7 @@
 		padding: 1rem;
 		border-radius: 10px;
 
-		::-webkit-scrollbar {
+		-webkit-scrollbar {
 			display: none;
 		}
 		.form-control-pill {
