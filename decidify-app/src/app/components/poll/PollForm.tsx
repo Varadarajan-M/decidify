@@ -18,6 +18,7 @@ type FormGroupProps = {
 	registerOptions?: RegisterOptions;
 	placeholder: string;
 	hasError?: boolean;
+	error?: string;
 };
 
 const FormGroup = ({
@@ -28,6 +29,7 @@ const FormGroup = ({
 	placeholder,
 	registerOptions = {},
 	hasError = false,
+	error = '',
 }: FormGroupProps) => (
 	<div className='form-group'>
 		<label htmlFor={htmlFor} className='form-label'>
@@ -39,7 +41,13 @@ const FormGroup = ({
 			placeholder={placeholder}
 			className={`form-control ${hasError ? 'error' : ''}`}
 		/>
+
+		{hasError && <ErrorMessage message={error} />}
 	</div>
+);
+
+const ErrorMessage = ({ message }: { message: string }) => (
+	<span className='error-message'>{message}</span>
 );
 
 const PollForm = () => {
@@ -54,7 +62,7 @@ const PollForm = () => {
 		watch,
 		handleSubmit,
 		setFocus,
-		setValue,
+		resetField,
 	} = useForm<FormData>({
 		mode: 'onTouched',
 	});
@@ -71,11 +79,11 @@ const PollForm = () => {
 	const addOptionHandler = useCallback(() => {
 		const pollOptions = watch('Poll_Options');
 		if (pollOptions) {
-			setPollOptionPills((prev) => [...new Set([pollOptions, ...prev])]);
-			setValue('Poll_Options', '');
 			setFocus('Poll_Options');
+			setPollOptionPills((prev) => [...new Set([pollOptions, ...prev])]);
+			resetField('Poll_Options');
 		}
-	}, [setFocus, setValue, watch]);
+	}, [setFocus, resetField, watch]);
 
 	const removeOptionHandler = useCallback((idx: number) => {
 		setPollOptionPills((prev) => prev.filter((_, i) => i !== idx));
@@ -87,7 +95,7 @@ const PollForm = () => {
 	);
 
 	const isPollOptionInvalid = useMemo(
-		() => pollOptionPills.length < 2 && isPollOptionBlurred,
+		() => isPollOptionBlurred && pollOptionPills.length < 2,
 		[pollOptionPills.length, isPollOptionBlurred],
 	);
 
@@ -104,6 +112,7 @@ const PollForm = () => {
 				registerOptions={Poll_Question.validations}
 				placeholder={Poll_Question.placeholder}
 				hasError={isPollQuestionInvalid}
+				error={errors.Poll_Question?.message}
 			/>
 
 			<div className='form-group'>
@@ -127,6 +136,13 @@ const PollForm = () => {
 						Add
 					</button>
 				</div>
+				<ErrorMessage
+					message={
+						isPollOptionInvalid
+							? 'Minimum 2 Poll Options should be provided'
+							: ''
+					}
+				/>
 				{pollOptionPills.length > 0 ? (
 					<div className='form-control-pills-container'>
 						{pollOptionPills.map((pill, idx) => (

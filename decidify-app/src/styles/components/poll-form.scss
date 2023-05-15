@@ -10,6 +10,13 @@
 	gap: 1.2rem;
 	box-shadow: 0 0 20px 0px #3b0739;
 
+	.error-message {
+		color: red;
+		font-weight: 300;
+		font-size: 0.7rem;
+		margin-block: 0.05rem;
+	}
+
 	.form-group {
 		display: flex;
 		flex-direction: column;
