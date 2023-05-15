@@ -1,0 +1,134 @@
+@import '../variables';
+@import '../mixins';
+.new-poll-form {
+	border: 2px solid #a20c82;
+	border-radius: 8px;
+	padding: 2.5rem 1.2rem;
+	background: #091426;
+	display: flex;
+	flex-direction: column;
+	gap: 1.2rem;
+	box-shadow: 0 0 20px 0px #3b0739;
+
+	.error-message {
+		color: red;
+		font-weight: 300;
+		font-size: 0.7rem;
+		margin-block: 0.05rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.7rem;
+		color: $button-text-gradient;
+
+		.form-label {
+			font-size: 1rem;
+			font-weight: 500;
+			letter-spacing: -0.7px;
+		}
+		.form-control {
+			@include reset-button;
+			border: 2px solid #3b54a938;
+			padding: 1rem 1.2rem;
+			border-radius: 8px;
+			background-color: #16182c;
+			color: rgba($button-text-gradient, 0.9);
+			font-weight: 500;
+			&.error {
+				border: 2px solid #680808;
+			}
+			&::placeholder {
+				color: rgba($button-text-gradient, 0.5);
+			}
+
+			&:-webkit-autofill {
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: #cacaed;
+				caret-color: #fff;
+			}
+		}
+
+		.form-group-input-btn {
+			display: grid;
+			grid-template-columns: 85% 1fr;
+
+			.form-control {
+				border-top-right-radius: 0;
+				border-bottom-right-radius: 0;
+				border-right: none;
+			}
+			.btn-round {
+				&.error {
+					border: 2px solid #680808;
+					border-left: none;
+				}
+				@include reset-button;
+				background: #5d0d60;
+				border-top-right-radius: 8px;
+				border-bottom-right-radius: 8px;
+				color: $button-text-gradient;
+				cursor: pointer;
+				font-weight: 700;
+			}
+		}
+	}
+	.gradient-btn {
+		@include reset-button;
+
+		background: $button-bg-gradient;
+		padding: 1rem 0.7rem;
+		font-size: 1rem;
+		border-radius: 8px;
+		font-weight: 800;
+		color: $button-text-gradient;
+		line-height: 1.2rem;
+		letter-spacing: -0.95px;
+		margin: auto;
+		width: 100%;
+		cursor: pointer;
+		margin-top: 10px;
+		&:not(:disabled):hover {
+			filter: brightness(1.4);
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+	}
+
+	.form-control-pills-container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		width: 100%;
+		max-height: 150px;
+		overflow-y: auto;
+		background: #2d09348f;
+
+		padding: 1rem;
+		border-radius: 10px;
+
+		-webkit-scrollbar {
+			display: none;
+		}
+		.form-control-pill {
+			padding: 0.4rem 1.2rem;
+			border-radius: 20px;
+			text-align: center;
+			background-color: #360041;
+			color: #cacaed;
+			font-weight: 500;
+			display: flex;
+			align-items: center;
+			gap: 0.3rem;
+			.close-icon {
+				margin-bottom: -2px;
+				justify-self: end;
+				color: rgb(159, 7, 7);
+			}
+		}
+	}
+}

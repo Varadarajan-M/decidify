@@ -1,0 +1,36 @@
+@import '../variables';
+
+.new-poll-container {
+	height: 100vh;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	// justify-content: center;
+
+	.form-container {
+		margin: auto;
+		max-width: min(480px, 75vw);
+
+		.new-poll-form-header {
+			color: $button-text-gradient;
+			font-weight: 800;
+			font-size: 2.5rem;
+			letter-spacing: -0.25px;
+			text-align: center;
+			margin: 1.5rem 1rem;
+		}
+	}
+}
+
+@media screen and (max-width: $medium-screen-size) {
+	.new-poll-container {
+		.form-container {
+			max-width: min(650px, 90vw);
+
+			.new-poll-form-header {
+				font-size: 2rem;
+			}
+		}
+	}
+}

@@ -39,7 +39,8 @@
 		line-height: 1.2rem;
 		letter-spacing: -0.95px;
 		cursor: pointer;
-
+		width: 270px;
+		text-align: center;
 		&:hover {
 			filter: brightness(1.4);
 		}
@@ -58,6 +59,7 @@
 		.create-poll-btn {
 			padding: 1rem;
 			font-size: 1rem;
+			width: unset;
 		}
 	}
 }

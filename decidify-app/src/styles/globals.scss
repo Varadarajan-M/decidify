@@ -19,14 +19,3 @@ a {
 button {
 	@include reset-button;
 }
-
-main {
-	.gradient-text {
-	}
-	.gradient-header {
-		@include gradient-text($gradient-header);
-		font-weight: 700;
-		font-size: 4rem;
-		filter: contrast(0.8);
-	}
-}
