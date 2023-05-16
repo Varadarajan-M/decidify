@@ -1,6 +1,6 @@
 'use client';
 import '@/styles/components/poll-form.scss';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RegisterOptions, UseFormRegister, useForm } from 'react-hook-form';
 import { AiOutlineClose } from 'react-icons/ai';
 import { formConfig } from './form-config';
@@ -55,6 +55,9 @@ const PollForm = () => {
 	const [pollOptionPills, setPollOptionPills] = useState<string[]>([]);
 	const [isPollOptionBlurred, setIsPollOptionBlurred] =
 		useState<boolean>(false);
+	let pollOptionValidationTimer = useRef<NodeJS.Timeout | null>(null);
+	const [showPollOptionError, setShowPollOptionError] =
+		useState<boolean>(false);
 
 	const {
 		register,
@@ -96,8 +99,20 @@ const PollForm = () => {
 
 	const isPollOptionInvalid = useMemo(
 		() => isPollOptionBlurred && pollOptionPills.length < 2,
-		[pollOptionPills.length, isPollOptionBlurred],
+		[isPollOptionBlurred, pollOptionPills.length],
 	);
+
+	useEffect(() => {
+		pollOptionValidationTimer.current = setTimeout(() => {
+			setShowPollOptionError(isPollOptionInvalid);
+		}, 500);
+
+		return () => {
+			if (pollOptionValidationTimer.current) {
+				clearTimeout(pollOptionValidationTimer.current);
+			}
+		};
+	}, [isPollOptionInvalid]);
 
 	return (
 		<form
@@ -124,21 +139,21 @@ const PollForm = () => {
 						{...register('Poll_Options')}
 						id={Poll_Options.id}
 						placeholder={Poll_Options.placeholder}
-						className={`form-control ${isPollOptionInvalid ? 'error' : ''}`}
+						className={`form-control ${showPollOptionError ? 'error' : ''}`}
 						onBlur={() => setIsPollOptionBlurred(true)}
 						onFocus={() => setIsPollOptionBlurred(false)}
 					/>
 					<button
 						type='button'
 						onClick={addOptionHandler}
-						className={`btn-round ${isPollOptionInvalid ? 'error' : ''}`}
+						className={`btn-round ${showPollOptionError ? 'error' : ''}`}
 					>
 						Add
 					</button>
 				</div>
 				<ErrorMessage
 					message={
-						isPollOptionInvalid
+						showPollOptionError
 							? 'Minimum 2 Poll Options should be provided'
 							: ''
 					}
