@@ -1,0 +1,75 @@
+@import '../variables';
+@import '../mixins';
+
+.container {
+	height: 100vh;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	.poll-success-message-container {
+		margin: auto;
+		max-width: min(700px, 75vw);
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		text-align: center;
+
+		.poll-success-header {
+			color: $button-text-gradient;
+			font-weight: 800;
+			font-size: 2.2rem;
+			letter-spacing: -0.25px;
+		}
+
+		.poll-share-message {
+			color: $text-color;
+			margin: auto;
+			font-size: 0.9rem;
+		}
+
+		.copy-to-clipboard-btn {
+			@include reset-button;
+
+			background: $button-bg-gradient;
+			padding: 1rem 0.7rem;
+			font-size: 1rem;
+			border-radius: 8px;
+			font-weight: 800;
+			color: $button-text-gradient;
+			line-height: 1.2rem;
+			letter-spacing: -0.95px;
+			margin-inline: auto;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			transition: background 0.3s ease-in;
+
+			&:hover {
+				filter: brightness(1.4);
+			}
+
+			&:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+
+			&.copied {
+				background: linear-gradient(45deg, #181c2a, #0c0c0c);
+			}
+		}
+	}
+}
+
+@media screen and (max-width: $small-screen-size) {
+	.container {
+		.poll-success-message-container {
+			max-width: 95vw;
+			.poll-success-header {
+				font-size: 1.8rem;
+			}
+		}
+	}
+}

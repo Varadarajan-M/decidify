@@ -1,5 +1,6 @@
 'use client';
 import '@/styles/components/poll-form.scss';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RegisterOptions, UseFormRegister, useForm } from 'react-hook-form';
 import { AiOutlineClose } from 'react-icons/ai';
@@ -58,6 +59,7 @@ const PollForm = () => {
 	let pollOptionValidationTimer = useRef<NodeJS.Timeout | null>(null);
 	const [showPollOptionError, setShowPollOptionError] =
 		useState<boolean>(false);
+	const router = useRouter();
 
 	const {
 		register,
@@ -77,6 +79,7 @@ const PollForm = () => {
 			Poll_Owner: data.Poll_Owner || 'Anonymous',
 		};
 		console.log(pollData);
+		router.push(`/new-poll/${data.Poll_Question.replaceAll(' ', '-')}`);
 	};
 
 	const addOptionHandler = useCallback(() => {
