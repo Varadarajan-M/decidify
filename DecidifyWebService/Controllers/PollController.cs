@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DecidifyWebService.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[controller]/[action]")]
 public class PollController : ControllerBase
 {
     private readonly IPollRepository _pollData;
@@ -14,32 +14,74 @@ public class PollController : ControllerBase
     {
         _pollData = Poll;
     }
-    //Create Poll
+    //create poll
     [HttpPost(Name = "CreatePoll")]
     public async Task<ActionResult> CreatePoll(CreatePollRequest pollRequestData)
     {
         try
         {
-            await _pollData.InsertPollIntoDB(pollRequestData);
-            return Ok("Create Poll Success");
+            var response = await _pollData.InsertPollIntoDB(pollRequestData);
+            var apiResponse = new ResponseMessageOutput(
+                ok: true,
+                message: "Poll Created Successfully",
+                data: new Dictionary<string, object>() { {"slug",response.ToString() } }
+                );
+            return Ok(apiResponse);
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            var apiResponse = new ResponseMessageOutput(
+                ok: false,
+                message: "Poll Creation Failed",
+                data: new Dictionary<string, object>() { { "slug", ex.Message} }
+                );
+            return BadRequest(apiResponse);
         }
     }
-
-    [HttpPut(Name = "Vote")]
-    public bool UpdateVote(UpdatePollRequest pollRequestData)
+    //update poll
+    [HttpPut(Name = "UpdateVote")]
+    public async Task<ActionResult> UpdateVote(UpdatePollRequest updatePollData)
     {
         try
         {
-            // await _pollService.(pollRequestData);
-            return true;
+            var response = await _pollData.UpdatePollandFetchResult(updatePollData);
+            var apiResponse = new ResponseMessageOutput(
+                ok: true,
+                message: "Poll Updated Successfully"
+                );
+            return Ok(apiResponse);
         }
         catch (Exception ex)
         {
-            return false;
+            var apiResponse = new ResponseMessageOutput(
+                ok: false,
+                message: "Poll Updation Failed",
+                data: new Dictionary<string, object> { { "slug", ex.Message} }
+                );
+            return BadRequest(apiResponse);
+        }
+    }
+    //get poll data
+    [HttpGet (Name ="GetPollDetails")]
+    public async Task<ActionResult> GetPollDetails(string slug)
+    {
+        try
+        {
+            var response = await _pollData.FetchPollData(slug);
+            var apiResponse = new ResponseMessageOutput(
+                ok: true,
+                message: "Poll Fetched Successfully",
+                data: new Dictionary<string, object>() { { "Poll_Details", response } }
+                );
+            return Ok(apiResponse);
+        }
+        catch (Exception ex)
+        {
+            var apiResponse = new ResponseMessageOutput(
+                ok: false,
+                message: "Poll Fetch Failed"
+                );
+            return BadRequest(apiResponse);
         }
     }
 }
