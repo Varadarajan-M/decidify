@@ -63,7 +63,7 @@ public class PollController : ControllerBase
     }
     //get poll data
     [HttpGet (Name ="GetPollDetails")]
-    public async Task<ActionResult> GetPollDetails(string slug)
+     public async Task<ActionResult> GetPollDetails(string slug)
     {
         try
         {
@@ -80,6 +80,30 @@ public class PollController : ControllerBase
             var apiResponse = new ResponseMessageOutput(
                 ok: false,
                 message: "Poll Fetch Failed"
+                );
+            return BadRequest(apiResponse);
+        }
+    }
+    //get poll options
+    [HttpGet(Name = "GetPollOptions")]
+    public async Task<ActionResult> GetPollOptions(string slug)
+    {
+        try
+        {
+            var response = await _pollData.FetchPollOptions(slug);
+            var apiResponse = new ResponseMessageOutput(
+                ok: true,
+                message: "Poll Question, Options Fetched Successfully",
+                data: new Dictionary<string, object> { { "Poll_Details", response } }               
+                ) ;
+           
+            return Ok(apiResponse);
+        }
+        catch (Exception ex)
+        {
+            var apiResponse = new ResponseMessageOutput(
+                ok: false,
+                message: "Poll Question, Options Fetch Failed"
                 );
             return BadRequest(apiResponse);
         }

@@ -7,6 +7,7 @@ public interface IPollRepository
     public Task<Object> InsertPollIntoDB(CreatePollRequest inputPollData);
     public Task<Object> UpdatePollandFetchResult(UpdatePollRequest updatePollData);
     public Task<Object> FetchPollData(string slug);
+    public Task<Object> FetchPollOptions(string slug);
 
 
 }
