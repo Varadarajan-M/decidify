@@ -2,7 +2,6 @@
 using Decidify.Repository.Models;
 using Newtonsoft.Json;
 
-
 namespace Decidify.Repository
 {
     public class PollRepository : IPollRepository
@@ -71,6 +70,23 @@ namespace Decidify.Repository
             }
            
            return pollRecord;
+        }
+        public async Task<Object> FetchPollOptions(string slugData)
+        {
+            Dictionary<string, object> respObj = null;
+            if (slugData != null)
+            {
+              var pollRecord = (from db in _dbContext.PollDetails where db.Poll_Slug == slugData select new { db.Poll_Options,db.Poll_Question }).FirstOrDefault();
+              var json = JsonConvert.DeserializeObject<Dictionary<string, int>>(pollRecord.Poll_Options);
+              var keysObj = json?.Keys;
+              respObj = new Dictionary<string, object> 
+              { 
+                { "Poll_Question", pollRecord.Poll_Question },
+                { "Poll_Options", keysObj } 
+              };
+            }
+            
+            return respObj;
         }
     }
 }
