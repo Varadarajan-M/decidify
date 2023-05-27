@@ -9,7 +9,6 @@ namespace DecidifyWebService.Controllers;
 public class PollController : ControllerBase
 {
     private readonly IPollRepository _pollData;
-
     public PollController(IPollRepository Poll)
     {
         _pollData = Poll;
@@ -61,7 +60,7 @@ public class PollController : ControllerBase
             return BadRequest(apiResponse);
         }
     }
-    //get poll data
+    //get poll details
     [HttpGet (Name ="GetPollDetails")]
      public async Task<ActionResult> GetPollDetails(string slug)
     {
