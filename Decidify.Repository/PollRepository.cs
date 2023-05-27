@@ -1,6 +1,7 @@
 ﻿using Decidify.Repository.Interfaces;
 using Decidify.Repository.Models;
 using Newtonsoft.Json;
+using Decidify.Repository.Helper;
 
 namespace Decidify.Repository
 {
@@ -14,15 +15,16 @@ namespace Decidify.Repository
         public async Task<Object> InsertPollIntoDB(CreatePollRequest pollDetails)
         {
             PollData pollData = null;
-            
-            if(pollDetails!= null)
+
+            if (pollDetails != null)
             {
                 pollData = new PollData
                 {
-                    Poll_Slug = pollDetails.Poll_Question.ToLower().Replace(" ", "-"),
+                    Poll_Slug = HelperFunctions.FilterSplCharacters(pollDetails.Poll_Question).ToLower().Replace(' ', '-').TrimEnd('-'),
                     Poll_Owner = pollDetails.Poll_Owner,
                     Poll_Question = pollDetails.Poll_Question,
-                    Poll_Options =  JsonConvert.SerializeObject(pollDetails.Poll_Options.ToDictionary(key=>key,value=>0))
+                    Poll_Options = JsonConvert.SerializeObject(pollDetails.Poll_Options.ToDictionary(key => key, value => 0)),
+                    Poll_CreatedDateTime = DateTime.Now
                 };
 
                 var result = await _dbContext.PollDetails.AddAsync(pollData);
@@ -44,11 +46,11 @@ namespace Decidify.Repository
             if (updatePollDetails != null)
             {
                 updatedPoll = (from db in _dbContext.PollDetails where db.Poll_Slug == updatePollDetails.Poll_Slug select db).FirstOrDefault();
-   
-                responseData = JsonConvert.DeserializeObject <Dictionary<string, int>>(updatedPoll.Poll_Options);
+
+                responseData = JsonConvert.DeserializeObject<Dictionary<string, int>>(updatedPoll.Poll_Options);
 
                 int value = (int)responseData[updatePollDetails.Poll_Option];
-                
+
                 responseData[updatePollDetails.Poll_Option] = value + 1;
 
                 updatedPoll.Poll_Options = JsonConvert.SerializeObject(responseData);
@@ -57,36 +59,38 @@ namespace Decidify.Repository
 
                 await _dbContext.SaveChangesAsync();
             }
-            return responseData;  
+            return responseData;
         }
 
         public async Task<Object> FetchPollData(string slugData)
         {
             PollData pollRecord = null;
+            Dictionary<string, object> dictionary = null;
 
-            if (slugData!= null)
+            if (slugData != null)
             {
                 pollRecord = (from db in _dbContext.PollDetails where db.Poll_Slug == slugData select db).FirstOrDefault();
+                dictionary = HelperFunctions.ObjectToDictionary<object>(pollRecord);
+                dictionary["Poll_Options"] = HelperFunctions.StringToDictionary<object>(pollRecord.Poll_Options);
             }
-           
-           return pollRecord;
+            return dictionary;
         }
         public async Task<Object> FetchPollOptions(string slugData)
         {
-            Dictionary<string, object> respObj = null;
+            Dictionary<string, object> respObject = null;
             if (slugData != null)
             {
-              var pollRecord = (from db in _dbContext.PollDetails where db.Poll_Slug == slugData select new { db.Poll_Options,db.Poll_Question }).FirstOrDefault();
-              var json = JsonConvert.DeserializeObject<Dictionary<string, int>>(pollRecord.Poll_Options);
-              var keysObj = json?.Keys;
-              respObj = new Dictionary<string, object> 
-              { 
+                var pollRecord = (from db in _dbContext.PollDetails where db.Poll_Slug == slugData select new { db.Poll_Options, db.Poll_Question, db.Poll_Owner }).FirstOrDefault();
+                var json = JsonConvert.DeserializeObject<Dictionary<string, int>>(pollRecord.Poll_Options);
+                var keysDictionary = json?.Keys;
+                respObject = new Dictionary<string, object>
+              {
                 { "Poll_Question", pollRecord.Poll_Question },
-                { "Poll_Options", keysObj } 
+                { "Poll_Options", keysDictionary },
+                { "Poll_Owner", pollRecord.Poll_Owner }
               };
             }
-            
-            return respObj;
+            return respObject;
         }
     }
 }

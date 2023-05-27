@@ -2,12 +2,8 @@
 {
     public class ResponseMessageOutput
     {
-        public ResponseMessageOutput(bool ok, string message)
-        {
-            this.ok = ok;
-            this.message = message;
-        }
-        public ResponseMessageOutput(bool ok, string message, Dictionary<string, object> data)
+
+        public ResponseMessageOutput(bool ok, string message, Dictionary<string, object>? data = null)
         {
             this.ok = ok;
             this.message = message;
