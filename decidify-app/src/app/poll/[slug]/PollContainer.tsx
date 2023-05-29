@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 //utils
@@ -11,9 +12,10 @@ type PollContainerProps = {
 		Poll_Question: string;
 		Poll_Options: string[];
 	};
+	slug: string;
 };
 
-const PollContainer = ({ pollDetails }: PollContainerProps) => {
+const PollContainer = ({ pollDetails, slug }: PollContainerProps) => {
 	const [isPollOver, setIsPollOver] = useState<boolean>(false);
 	return (
 		<div className='poll-container'>
@@ -32,6 +34,15 @@ const PollContainer = ({ pollDetails }: PollContainerProps) => {
 				setIsPollOver={setIsPollOver}
 				options={pollDetails.Poll_Options}
 			/>
+
+			<Link
+				role='button'
+				className='view-results-btn'
+				href={`/poll-results/${slug}`}
+			>
+				{' '}
+				View Results{' '}
+			</Link>
 		</div>
 	);
 };

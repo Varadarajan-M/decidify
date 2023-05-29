@@ -29,7 +29,7 @@ const PollPage = async ({ params }: PageProps) => {
 	return (
 		<section className='container'>
 			<Suspense fallback={<h1>Page loading..</h1>}>
-				<PollContainer pollDetails={pollDetails} />
+				<PollContainer slug={slug} pollDetails={pollDetails} />
 			</Suspense>
 		</section>
 	);
