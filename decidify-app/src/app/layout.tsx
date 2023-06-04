@@ -1,6 +1,6 @@
-import { Inter } from 'next/font/google';
 import '@/styles/globals.scss';
-
+import { Inter } from 'next/font/google';
+import ToastProvider from './components/Toast';
 // Global font
 const inter = Inter({
 	weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
@@ -22,7 +22,9 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang='en'>
-			<body className={inter.className}>{children}</body>
+			<body className={inter.className}>
+				<ToastProvider>{children}</ToastProvider>
+			</body>
 		</html>
 	);
 }

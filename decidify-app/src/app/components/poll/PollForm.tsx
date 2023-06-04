@@ -1,10 +1,17 @@
 'use client';
+import { api } from '@/api';
 import '@/styles/components/poll-form.scss';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RegisterOptions, UseFormRegister, useForm } from 'react-hook-form';
 import { AiOutlineClose } from 'react-icons/ai';
+import { toast } from 'react-toastify';
 import { formConfig } from './form-config';
+import { AnimatePresence, motion } from 'framer-motion';
+import { FormVariant } from '@/app/animations/variants';
+
+const { container, item } = FormVariant;
+
 type FormData = {
 	Poll_Question: string;
 	Poll_Options: string;
@@ -32,7 +39,7 @@ const FormGroup = ({
 	hasError = false,
 	error = '',
 }: FormGroupProps) => (
-	<div className='form-group'>
+	<motion.div variants={item} className='form-group'>
 		<label htmlFor={htmlFor} className='form-label'>
 			{label}
 		</label>
@@ -44,7 +51,7 @@ const FormGroup = ({
 		/>
 
 		{hasError && <ErrorMessage message={error} />}
-	</div>
+	</motion.div>
 );
 
 const ErrorMessage = ({ message }: { message: string }) => (
@@ -53,17 +60,24 @@ const ErrorMessage = ({ message }: { message: string }) => (
 
 const PollForm = () => {
 	const { Poll_Question, Poll_Options, Poll_Owner } = formConfig;
+
 	const [pollOptionPills, setPollOptionPills] = useState<string[]>([]);
+
 	const [isPollOptionBlurred, setIsPollOptionBlurred] =
 		useState<boolean>(false);
+
 	let pollOptionValidationTimer = useRef<NodeJS.Timeout | null>(null);
+
 	const [showPollOptionError, setShowPollOptionError] =
 		useState<boolean>(false);
+
+	const [loading, setLoading] = useState<boolean>(false);
+
 	const router = useRouter();
 
 	const {
 		register,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 		watch,
 		handleSubmit,
 		setFocus,
@@ -72,14 +86,39 @@ const PollForm = () => {
 		mode: 'onTouched',
 	});
 
-	const onSubmit = (data: FormData) => {
+	const onSubmit = async (data: FormData) => {
+		setLoading(true);
+
 		const pollData = {
 			Poll_Question: data.Poll_Question,
 			Poll_Options: pollOptionPills,
 			Poll_Owner: data.Poll_Owner || 'Anonymous',
 		};
-		console.log(pollData);
-		router.push(`/new-poll/${data.Poll_Question.replaceAll(' ', '-')}`);
+		const res = api.createPoll(pollData);
+
+		// notify while calling api
+		const id = await toast.promise(res, {
+			pending: `Creating poll for ${data.Poll_Question}...`,
+		});
+		api.withErrorHandleDo(
+			await res,
+			({ message, data }: any) => {
+				// to dismiss the prev notif if api call is success
+				toast.dismiss(id);
+
+				toast.info(message ?? 'Poll created successfully!', {
+					autoClose: 1000,
+				});
+
+				router.push(`/new-poll/${data?.slug}`);
+			},
+			(res: any) => {
+				// to dismiss the prev notif if error occurs
+				toast.dismiss(id);
+				toast.error(res?.message ?? 'Something went wrong:(');
+			},
+		);
+		setLoading(false);
 	};
 
 	const addOptionHandler = useCallback(() => {
@@ -118,9 +157,12 @@ const PollForm = () => {
 	}, [isPollOptionInvalid]);
 
 	return (
-		<form
+		<motion.form
+			variants={container}
+			initial='hidden'
+			animate='visible'
 			className='new-poll-form'
-			onSubmit={handleSubmit(onSubmit, console.log)}
+			onSubmit={handleSubmit(onSubmit)}
 		>
 			<FormGroup
 				htmlFor={Poll_Question.id}
@@ -133,7 +175,7 @@ const PollForm = () => {
 				error={errors.Poll_Question?.message}
 			/>
 
-			<div className='form-group'>
+			<motion.div variants={item} className='form-group'>
 				<label htmlFor={Poll_Options.id} className='form-label'>
 					{Poll_Options.label}
 				</label>
@@ -146,13 +188,15 @@ const PollForm = () => {
 						onBlur={() => setIsPollOptionBlurred(true)}
 						onFocus={() => setIsPollOptionBlurred(false)}
 					/>
-					<button
+					<motion.button
+						variants={item}
+						whileTap={{ scale: 0.9 }}
 						type='button'
 						onClick={addOptionHandler}
 						className={`btn-round ${showPollOptionError ? 'error' : ''}`}
 					>
 						Add
-					</button>
+					</motion.button>
 				</div>
 				<ErrorMessage
 					message={
@@ -162,21 +206,33 @@ const PollForm = () => {
 					}
 				/>
 				{pollOptionPills.length > 0 ? (
-					<div className='form-control-pills-container'>
-						{pollOptionPills.map((pill, idx) => (
-							<span key={pill} className='form-control-pill'>
-								{pill}
-								<AiOutlineClose
-									onClick={() => removeOptionHandler(idx)}
-									className='close-icon'
-								/>
-							</span>
-						))}
-					</div>
+					<motion.div
+						variants={container}
+						initial={'hidden'}
+						animate={'visible'}
+						className='form-control-pills-container'
+					>
+						<AnimatePresence>
+							{pollOptionPills.map((pill, idx) => (
+								<motion.span
+									variants={item}
+									key={pill}
+									exit={{ opacity: 0, transition: { duration: 0.2 } }}
+									className='form-control-pill'
+								>
+									{pill}
+									<AiOutlineClose
+										onClick={() => removeOptionHandler(idx)}
+										className='close-icon'
+									/>
+								</motion.span>
+							))}
+						</AnimatePresence>
+					</motion.div>
 				) : (
 					''
 				)}
-			</div>
+			</motion.div>
 			<FormGroup
 				htmlFor={Poll_Owner.id}
 				label={Poll_Owner.label}
@@ -185,13 +241,15 @@ const PollForm = () => {
 				placeholder={Poll_Owner.placeholder}
 			/>
 
-			<button
+			<motion.button
+				whileTap={{ scale: 0.9 }}
+				variants={item}
 				disabled={isPollQuestionInvalid || isPollOptionInvalid}
 				className='submit-btn gradient-btn'
 			>
-				Create
-			</button>
-		</form>
+				{loading ? 'Creating Poll...' : 'Create'}
+			</motion.button>
+		</motion.form>
 	);
 };
 

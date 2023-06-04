@@ -1,3 +1,5 @@
+import { api } from '@/api';
+import ErrorPage from '@/app/components/ErrorPage';
 import '@/styles/pages/poll-results.scss';
 import PollResultsContainer from './PollResultsContainer';
 type PageProps = {
@@ -6,34 +8,25 @@ type PageProps = {
 	};
 };
 
-const fakeApi = async () => {
-	return new Promise<any>((resolve) =>
-		resolve({
-			Poll_Question: 'What to eat today?',
-			Poll_Results: {
-				Pizza: 10,
-				Burger: 25,
-				Taco: 14,
-				Sushi: 6,
-				Pasta: 20,
-				Steak: 8,
-				Salad: 12,
-				'Ice Cream': 18,
-				Sandwich: 22,
-				'Chicken Wings': 16,
-			},
-		}),
-	);
-};
-
 const PollResultsPage = async ({ params }: PageProps) => {
 	const { slug } = params;
 
-	const results = await fakeApi();
+	const res = await api.getPollResults(slug);
+
+	console.log('Res', res);
+
+	if (api.isError(res)) {
+		return <ErrorPage error={res?.message} />;
+	}
+
+	const pollResults = {
+		Poll_Question: res.data.Poll_Details?.Poll_Question ?? '',
+		Poll_Results: res.data.Poll_Details?.Poll_Options ?? {},
+	};
 
 	return (
 		<section className='container'>
-			<PollResultsContainer pollResults={results} />
+			<PollResultsContainer pollResults={pollResults} />
 		</section>
 	);
 };

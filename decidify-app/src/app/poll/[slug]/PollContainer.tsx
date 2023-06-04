@@ -1,11 +1,19 @@
 'use client';
 
+import { api } from '@/api';
+
+import { Div, H1, P, Span } from '@/app/animations/MotionComponents';
+
+import { PollVariant } from '@/app/animations/variants';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-toastify';
+
+const { container, item } = PollVariant;
 
 //utils
-const transformOptions = (options: string[]) =>
-	options.map((op, idx) => ({ value: op, isVisited: false, index: idx }));
+const transformOptions = (options: string[] = []) =>
+	options?.map((op, idx) => ({ value: op, isVisited: false, index: idx }));
 
 type PollContainerProps = {
 	pollDetails: {
@@ -17,33 +25,45 @@ type PollContainerProps = {
 
 const PollContainer = ({ pollDetails, slug }: PollContainerProps) => {
 	const [isPollOver, setIsPollOver] = useState<boolean>(false);
+
+
+	
+	
+	
 	return (
-		<div className='poll-container'>
-			<h2 className='poll-header'>
+		<Div
+			className='poll-container'
+			variants={container}
+			initial='hidden'
+			animate='show'
+		>
+			<H1 className='poll-header' variants={item}>
 				{isPollOver ? 'Wow!' : 'Alright!'}
 				{isPollOver ? (
 					<span>Amazing Choice.</span>
 				) : (
 					<span>Let&apos;s do this.</span>
 				)}
-			</h2>
-			<h3 className='poll-question'>{pollDetails.Poll_Question}</h3>
+			</H1>
+			<P variants={item} className='poll-question'>
+				{pollDetails.Poll_Question}
+			</P>
 
-			<Poll
-				isPollOver={isPollOver}
-				setIsPollOver={setIsPollOver}
-				options={pollDetails.Poll_Options}
-			/>
-
-			<Link
-				role='button'
-				className='view-results-btn'
-				href={`/poll-results/${slug}`}
-			>
-				{' '}
-				View Results{' '}
-			</Link>
-		</div>
+			<Div variants={item}>
+				<Poll
+					isPollOver={isPollOver}
+					setIsPollOver={setIsPollOver}
+					options={pollDetails?.Poll_Options}
+					slug={slug}
+				/>
+			</Div>
+			<Div variants={item} className='view-results-btn'>
+				<Link role='button' href={`/poll-results/${slug}`}>
+					{' '}
+					View Results{' '}
+				</Link>
+			</Div>
+		</Div>
 	);
 };
 
@@ -51,6 +71,7 @@ type PollProps = {
 	options: string[];
 	isPollOver: boolean;
 	setIsPollOver: React.Dispatch<React.SetStateAction<boolean>>;
+	slug: string;
 };
 
 type TransformedOption = {
@@ -59,7 +80,12 @@ type TransformedOption = {
 	index: number;
 };
 
-function Poll({ options: optionsProps, isPollOver, setIsPollOver }: PollProps) {
+function Poll({
+	options: optionsProps,
+	isPollOver,
+	setIsPollOver,
+	slug,
+}: PollProps) {
 	const [options, setOptions] = useState<TransformedOption[]>(
 		transformOptions(optionsProps),
 	);
@@ -105,26 +131,44 @@ function Poll({ options: optionsProps, isPollOver, setIsPollOver }: PollProps) {
 
 			if (randomOption) {
 				setOptionsToShow((prev) => {
-					let tmp = [...prev];
-					tmp[Number(!clickedIdx)] = randomOption;
-					return tmp;
+					prev[Number(!clickedIdx)] = randomOption;
+					return [...prev];
 				});
 			} else {
-				setIsPollOver(true);
-				setOptionsToShow((prev) => [prev[clickedIdx]]);
+				const notifyError = () =>
+					toast.error('Something went wrong. Please try again:(');
+				api
+					.updateVote({
+						Poll_Slug: slug,
+						Poll_Option: optionsToShow[clickedIdx]?.value ?? 'Random',
+					})
+					.then((res) => {
+						api.withErrorHandleDo(
+							res,
+							() => {
+								setOptionsToShow((prev) => [prev[clickedIdx]]);
+								setIsPollOver(true);
+							},
+							notifyError,
+						);
+					})
+					.catch(notifyError);
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [optionsRemainingToShow, clickedIdx, getRandomOption, setIsPollOver]);
 
 	return (
-		<div className='poll-options-container'>
+		<Div className='poll-options-container' variants={container}>
 			{!isPollOver ? (
 				<>
 					<PollCard
 						onClick={() => optionClickHandler(optionsToShow[0], 0)}
 						option={optionsToShow[0].value}
 					/>
-					<span className='or-text'>or</span>
+					<Span variants={item} className='or-text'>
+						or
+					</Span>
 					<PollCard
 						onClick={() => optionClickHandler(optionsToShow[1], 1)}
 						option={optionsToShow[1].value}
@@ -136,7 +180,7 @@ function Poll({ options: optionsProps, isPollOver, setIsPollOver }: PollProps) {
 					option={optionsToShow[0].value + ' It is!'}
 				/>
 			)}
-		</div>
+		</Div>
 	);
 }
 
@@ -150,13 +194,18 @@ function PollCard({
 	className?: string;
 }) {
 	return (
-		<div
+		<Span
+			variants={item}
+			role='button'
 			tabIndex={-1}
 			onClick={onClick}
 			className={`poll-card ${className ?? ''}`}
+			whileTap={{
+				scale: 0.7,
+			}}
 		>
-			<p>{option}</p>
-		</div>
+			{option}
+		</Span>
 	);
 }
 

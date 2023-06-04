@@ -1,5 +1,6 @@
+import { api } from '@/api';
+import ErrorPage from '@/app/components/ErrorPage';
 import '@/styles/pages/poll.scss';
-import { Suspense } from 'react';
 import PollContainer from './PollContainer';
 type PageProps = {
 	params: {
@@ -7,30 +8,19 @@ type PageProps = {
 	};
 };
 
-const fakeApi = async () => {
-	return new Promise<any>((resolve) =>
-		resolve({
-			Poll_Question: 'What to eat today?',
-			Poll_Options: [
-				'Pizza',
-				'Burger',
-				'Nachos',
-				'Sizzlers',
-				'Briyani',
-				'Tacos',
-			],
-		}),
-	);
-};
-
 const PollPage = async ({ params }: PageProps) => {
 	const { slug } = params;
-	const pollDetails = await fakeApi();
+	const res = await api.getPollOptions(slug);
+
+	console.log('Res', res);
+
+	if (api.isError(res)) {
+		return <ErrorPage error={res?.message} />;
+	}
+
 	return (
 		<section className='container'>
-			<Suspense fallback={<h1>Page loading..</h1>}>
-				<PollContainer slug={slug} pollDetails={pollDetails} />
-			</Suspense>
+			<PollContainer slug={slug} pollDetails={res?.data?.Poll_Details} />
 		</section>
 	);
 };

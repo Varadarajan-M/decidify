@@ -1,29 +1,26 @@
 'use client';
-
+import { HTMLMotionProps, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { BiCopy } from 'react-icons/bi';
 import { TiTick } from 'react-icons/ti';
-interface IGenericProps {
-	className?: string;
-	children?: React.ReactNode;
-	style?: React.CSSProperties;
-}
 
-interface IButtonProps extends IGenericProps {
-	onClick?: (...args: any[]) => void;
-}
+const copyTextInMobile = (text: string) => {
+	const textArea = document.createElement('textarea');
+	textArea.value = text;
+	textArea.style.position = 'fixed';
+	document.body.appendChild(textArea);
+	textArea.select();
+	textArea.setSelectionRange(0, textArea.value?.length);
+	const isCopied = document.execCommand('copy');
 
-const Button = ({ className, children, onClick }: IButtonProps) => {
-	return (
-		<button onClick={onClick} className={className}>
-			{children}
-		</button>
-	);
+	isCopied && document.body.removeChild(textArea);
+
+	return isCopied;
 };
 
 type CopyToClipboardBtnProps = {
 	text: string;
-};
+} & HTMLMotionProps<'button'>;
 
 const CopyToClipboardBtn: React.FC<CopyToClipboardBtnProps> = (
 	props: CopyToClipboardBtnProps,
@@ -32,20 +29,32 @@ const CopyToClipboardBtn: React.FC<CopyToClipboardBtnProps> = (
 	const [copied, setCopied] = useState(false);
 
 	const copyToClipboard = async (text: string) => {
-		navigator.clipboard.writeText(text).then(() => {
-			setMessage('Copied to Clipboard');
+		if (navigator.clipboard) {
+			navigator.clipboard.writeText(text).then(() => {
+				setMessage('Copied to Clipboard');
+				setCopied(true);
+			});
+		} else {
 			setCopied(true);
-		});
+			setMessage(
+				copyTextInMobile(text)
+					? 'Copied to Clipboard'
+					: 'Cannot copy to clipboard',
+			);
+		}
 	};
 
 	return (
-		<Button
-			onClick={() => copyToClipboard(props.text)}
+		<motion.button
+			{...props}
+			onClick={() =>
+				copyToClipboard('http://localhost:3000/poll/' + props.text)
+			}
 			className={`copy-to-clipboard-btn ${copied ? 'copied' : ''}`}
 		>
 			<span>{message}</span>
 			{copied ? <TiTick /> : <BiCopy />}
-		</Button>
+		</motion.button>
 	);
 };
 
