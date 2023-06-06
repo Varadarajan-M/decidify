@@ -11,9 +11,6 @@ type PageProps = {
 const PollPage = async ({ params }: PageProps) => {
 	const { slug } = params;
 	const res = await api.getPollOptions(slug);
-
-	console.log('Res', res);
-
 	if (api.isError(res)) {
 		return <ErrorPage error={res?.message} />;
 	}

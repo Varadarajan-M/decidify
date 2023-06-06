@@ -9,4 +9,10 @@ const Loader = () => {
 	);
 };
 
+export const LoaderContainer = () => (
+	<div className='loader-container'>
+			<Loader />
+	</div>
+)
+
 export default Loader;

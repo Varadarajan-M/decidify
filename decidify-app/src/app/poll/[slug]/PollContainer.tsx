@@ -45,7 +45,7 @@ const PollContainer = ({ pollDetails, slug }: PollContainerProps) => {
 					<span>Let&apos;s do this.</span>
 				)}
 			</H1>
-			<P variants={item} className='poll-question'>
+			<P style={{display:isPollOver ? 'none' : 'block'}} variants={item} className='poll-question'>
 				{pollDetails.Poll_Question}
 			</P>
 
@@ -58,7 +58,7 @@ const PollContainer = ({ pollDetails, slug }: PollContainerProps) => {
 				/>
 			</Div>
 			<Div variants={item} className='view-results-btn'>
-				<Link role='button' href={`/poll-results/${slug}`}>
+				<Link prefetch={false} role='button' href={`/poll-results/${slug}`}>
 					{' '}
 					View Results{' '}
 				</Link>
@@ -176,8 +176,9 @@ function Poll({
 				</>
 			) : (
 				<PollCard
+					style={{fontSize:'1.4rem',marginInline:'25px'}}
 					className='w-100'
-					option={optionsToShow[0].value + ' It is!'}
+					option={"You've selected " + optionsToShow[0]?.value }
 				/>
 			)}
 		</Div>
@@ -188,10 +189,12 @@ function PollCard({
 	option,
 	onClick,
 	className,
+	style
 }: {
 	option: string;
 	onClick?: (...args: any) => void;
 	className?: string;
+	style?:React.CSSProperties
 }) {
 	return (
 		<Span
@@ -203,6 +206,7 @@ function PollCard({
 			whileTap={{
 				scale: 0.7,
 			}}
+			style={style}
 		>
 			{option}
 		</Span>

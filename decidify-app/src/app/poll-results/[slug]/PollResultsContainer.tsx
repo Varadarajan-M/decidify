@@ -1,6 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FcBarChart, FcDoughnutChart } from 'react-icons/fc';
 import {
 	Bar,
@@ -39,7 +39,7 @@ type PollResult = {
 const formatPollResults = (
 	Poll_Results: Record<string, number>,
 ): PollResult[] =>
-	Object.entries(Poll_Results).map(([option, value]) => ({
+	Object.entries(Poll_Results ?? {}).map(([option, value]) => ({
 		option,
 		votes: value,
 	}));
@@ -88,7 +88,11 @@ const colors = [
 	'#FF7F50',
 ];
 
-const Barchart = <T,>({ data }: { data: T[] }) => (
+interface ChartProps<T> {
+	data: T[];
+}
+
+const Barchart = React.memo(<T,>({ data }: ChartProps<T>) => (
 	<ResponsiveContainer
 		minWidth={'300px'}
 		minHeight={'300px'}
@@ -163,9 +167,10 @@ const Barchart = <T,>({ data }: { data: T[] }) => (
 			/>
 		</BarChart>
 	</ResponsiveContainer>
-);
+));
+Barchart.displayName = 'BarChart';
 
-const Piechart = <T,>({ data }: { data: T[] }) => (
+const Piechart = React.memo(<T,>({ data }: ChartProps<T>) => (
 	<>
 		<ResponsiveContainer
 			minWidth={'300px'}
@@ -207,7 +212,9 @@ const Piechart = <T,>({ data }: { data: T[] }) => (
 			</PieChart>
 		</ResponsiveContainer>
 	</>
-);
+));
+
+Piechart.displayName = 'PieChart';
 
 type ButtonGroupProps = {
 	children: React.ReactNode;
@@ -216,21 +223,52 @@ const ButtonGroup = (props: ButtonGroupProps) => {
 	return <div className='button-group'>{props.children}</div>;
 };
 
+type ChartButtonsProps = {
+	activeChartIndex: number;
+	setActiveChartIndex: React.Dispatch<React.SetStateAction<number>>;
+};
+
+const ChartButtons = React.memo(
+	({ activeChartIndex, setActiveChartIndex }: ChartButtonsProps) => {
+		const [hoverIndex, setHoverIndex] = useState<number>(0);
+		const resetHover = () => setHoverIndex(-1);
+		const buttons = [
+			{ button: FcBarChart, tooltip: 'View Bar Chart' },
+			{ button: FcDoughnutChart, tooltip: 'View Doughnut Chart' },
+		];
+
+		return (
+			<ButtonGroup>
+				{buttons.map(({ button: Button, tooltip }, idx) => (
+					<div
+						key={idx}
+						className='button-container'
+						onMouseEnter={() => setHoverIndex(idx)}
+						onMouseLeave={resetHover}
+					>
+						<Button
+							className={`button ${activeChartIndex === idx ? 'active' : ''}`}
+							onClick={() => setActiveChartIndex(idx)}
+						/>
+						{hoverIndex === idx && activeChartIndex !== idx ? (
+							<span className='button-tooltip'>{tooltip}</span>
+						) : (
+							''
+						)}
+					</div>
+				))}
+			</ButtonGroup>
+		);
+	},
+);
+
 function PollResultsContainer({ pollResults }: PollResultsContainerProps) {
 	const [activeChartIndex, setActiveChartIndex] = useState<number>(0);
-	const [hoverIndex, setHoverIndex] = useState<number>(0);
-
-	const resetHover = () => setHoverIndex(-1);
 
 	const data: PollResult[] = useMemo(
 		() => formatPollResults(pollResults.Poll_Results),
 		[pollResults.Poll_Results],
 	);
-
-	const buttons = [
-		{ button: FcBarChart, tooltip: 'View Bar Chart' },
-		{ button: FcDoughnutChart, tooltip: 'View Doughnut Chart' },
-	];
 
 	const winner = useMemo(
 		() =>
@@ -256,26 +294,10 @@ function PollResultsContainer({ pollResults }: PollResultsContainerProps) {
 
 			<p className='poll-question'>Let&apos;s see what others voted.</p>
 
-			<ButtonGroup>
-				{buttons.map(({ button: Button, tooltip }, idx) => (
-					<div
-						key={idx}
-						className='button-container'
-						onMouseEnter={() => setHoverIndex(idx)}
-						onMouseLeave={resetHover}
-					>
-						<Button
-							className={`button ${activeChartIndex === idx ? 'active' : ''}`}
-							onClick={() => setActiveChartIndex(idx)}
-						/>
-						{hoverIndex === idx && activeChartIndex !== idx ? (
-							<span className='button-tooltip'>{tooltip}</span>
-						) : (
-							''
-						)}
-					</div>
-				))}
-			</ButtonGroup>
+			<ChartButtons
+				activeChartIndex={activeChartIndex}
+				setActiveChartIndex={setActiveChartIndex}
+			/>
 
 			{activeChartIndex === 0 ? (
 				<Barchart data={data} />

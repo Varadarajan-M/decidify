@@ -1,10 +1,8 @@
-import Loader from '@/app/components/Loader';
+import  { LoaderContainer } from '@/app/components/Loader';
 
 const LoadingPage = () => {
 	return (
-		<div className='loader-container'>
-			<Loader />
-		</div>
+		<LoaderContainer />
 	);
 };
 
