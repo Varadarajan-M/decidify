@@ -1,6 +1,7 @@
 using Decidify.Repository;
 using Decidify.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MySql.EntityFrameworkCore.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,17 +9,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
 
+// Configure the connection string.
+var connection = new MySqlConnectionString();
+var connectionString = connection.ConnectionString;
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 //Configure Repository
 builder.Services.AddTransient<IPollRepository, PollRepository>();
-//Configure DbContext 
-builder.Services.AddDbContext<PollContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DecidifyDBConnectionString")));
-//Configure Cors
-builder.Services.AddCors();
 
+//Configure DbContext 
+/*builder.Services.AddEntityFrameworkMySQL().AddDbContext<PollContext>(options =>
+                options.UseMySQL(builder.Configuration.GetConnectionString("DecidifyDBConnectionString")));*/
+builder.Services.AddEntityFrameworkMySQL().AddDbContext<PollContext>(options =>
+                options.UseMySQL(connectionString));
+
+// Configure Cors
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -28,8 +37,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
 
 app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000"));
 

@@ -13,9 +13,9 @@ public class PollController : ControllerBase
     {
         _pollData = Poll;
     }
-    //create poll
+    //create poll --> api/CreatePoll
     [HttpPost(Name = "CreatePoll")]
-    public async Task<ActionResult> CreatePoll(CreatePollRequest pollRequestData)
+    public async Task<ActionResult> CreatePoll([FromBody] CreatePollRequest pollRequestData)
     {
         try
         {
@@ -23,21 +23,22 @@ public class PollController : ControllerBase
             var apiResponse = new ResponseMessageOutput(
                 ok: true,
                 message: "Poll Created Successfully",
-                data: new Dictionary<string, object>() { {"slug",response.ToString() } }
+                data: new Dictionary<string, object>() { { "slug", response.ToString() } }
                 );
             return Ok(apiResponse);
         }
+
         catch (Exception ex)
         {
             var apiResponse = new ResponseMessageOutput(
                 ok: false,
                 message: "Poll Creation Failed",
-                data: new Dictionary<string, object>() { { "slug", ex.Message} }
+                data: new Dictionary<string, object>() { { "message", ex.Message } }
                 );
             return BadRequest(apiResponse);
         }
     }
-    //update poll
+    //update poll --> api/UpdateVote
     [HttpPut(Name = "UpdateVote")]
     public async Task<ActionResult> UpdateVote(UpdatePollRequest updatePollData)
     {
@@ -55,14 +56,14 @@ public class PollController : ControllerBase
             var apiResponse = new ResponseMessageOutput(
                 ok: false,
                 message: "Poll Updation Failed",
-                data: new Dictionary<string, object> { { "slug", ex.Message} }
+                data: new Dictionary<string, object> { { "slug", ex.Message } }
                 );
             return BadRequest(apiResponse);
         }
     }
-    //get poll details
-    [HttpGet (Name ="GetPollDetails")]
-     public async Task<ActionResult> GetPollDetails(string slug)
+    //get poll details --> api/GetPollDetails
+    [HttpGet(Name = "GetPollDetails")]
+    public async Task<ActionResult> GetPollDetails(string slug)
     {
         try
         {
@@ -83,7 +84,7 @@ public class PollController : ControllerBase
             return BadRequest(apiResponse);
         }
     }
-    //get poll options
+    //get poll options --> api/GetPollOptions
     [HttpGet(Name = "GetPollOptions")]
     public async Task<ActionResult> GetPollOptions(string slug)
     {
@@ -93,9 +94,9 @@ public class PollController : ControllerBase
             var apiResponse = new ResponseMessageOutput(
                 ok: true,
                 message: "Poll Question, Options Fetched Successfully",
-                data: new Dictionary<string, object> { { "Poll_Details", response } }               
-                ) ;
-           
+                data: new Dictionary<string, object> { { "Poll_Details", response } }
+                );
+
             return Ok(apiResponse);
         }
         catch (Exception ex)
