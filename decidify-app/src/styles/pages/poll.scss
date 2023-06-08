@@ -56,12 +56,11 @@
 
 				font-weight: 900;
 				width: 150px;
-				transition: all 0.2s ease-in;
+				transition: border 0.2s ease-in, color 0.2s ease-in;
 				cursor: pointer;
 				&:not(.w-100):hover {
 					border: 2px solid #143b7c;
 					color: rgb(192, 41, 104);
-					transform: scale(1.1);
 				}
 				&.w-100 {
 					width: 100%;

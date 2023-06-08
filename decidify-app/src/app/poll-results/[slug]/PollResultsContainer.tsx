@@ -1,6 +1,8 @@
 'use client';
+import { H1, P, Span, Div } from '@/app/animations/MotionComponents';
+import { HomeVariant as PollResultVariant } from '@/app/animations/variants';
 import dynamic from 'next/dynamic';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FcBarChart, FcDoughnutChart } from 'react-icons/fc';
 import {
 	Bar,
@@ -13,6 +15,9 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
+import { colors } from './constants';
+
+const { container, item } = PollResultVariant;
 
 const BarChart = dynamic(
 	() => import('recharts').then((recharts) => recharts.BarChart),
@@ -39,56 +44,16 @@ type PollResult = {
 const formatPollResults = (
 	Poll_Results: Record<string, number>,
 ): PollResult[] =>
-	Object.entries(Poll_Results).map(([option, value]) => ({
+	Object.entries(Poll_Results ?? {}).map(([option, value]) => ({
 		option,
 		votes: value,
 	}));
 
-const colors = [
-	'#FF6384',
-	'#36A2EB',
-	'#FFCE56',
-	'#4BC0C0',
-	'#FF9F40',
-	'#9966FF',
-	'#1E90FF',
-	'#FF6384',
-	'#8A2BE2',
-	'#FFD700',
-	'#32CD32',
-	'#FF4500',
-	'#00BFFF',
-	'#FF69B4',
-	'#008080',
-	'#00876c',
-	'#529d6d',
-	'#85b271',
-	'#b7c57b',
-	'#e9d78b',
-	'#e8b56a',
-	'#e69155',
-	'#e0694d',
-	'#d43d51',
-	'#8A2BE2',
-	'#FFD700',
-	'#32CD32',
-	'#FF4500',
-	'#00BFFF',
-	'#FF69B4',
-	'#008080',
-	'#FF8C00',
-	'#00CED1',
-	'#FF1493',
-	'#1E90FF',
-	'#FF7F50',
-	'#FF8C00',
-	'#00CED1',
-	'#FF1493',
-	'#1E90FF',
-	'#FF7F50',
-];
+interface ChartProps<T> {
+	data: T[];
+}
 
-const Barchart = <T,>({ data }: { data: T[] }) => (
+const Barchart = React.memo(<T,>({ data }: ChartProps<T>) => (
 	<ResponsiveContainer
 		minWidth={'300px'}
 		minHeight={'300px'}
@@ -163,9 +128,10 @@ const Barchart = <T,>({ data }: { data: T[] }) => (
 			/>
 		</BarChart>
 	</ResponsiveContainer>
-);
+));
+Barchart.displayName = 'BarChart';
 
-const Piechart = <T,>({ data }: { data: T[] }) => (
+const Piechart = React.memo(<T,>({ data }: ChartProps<T>) => (
 	<>
 		<ResponsiveContainer
 			minWidth={'300px'}
@@ -207,55 +173,36 @@ const Piechart = <T,>({ data }: { data: T[] }) => (
 			</PieChart>
 		</ResponsiveContainer>
 	</>
-);
+));
+
+Piechart.displayName = 'PieChart';
 
 type ButtonGroupProps = {
 	children: React.ReactNode;
 };
 const ButtonGroup = (props: ButtonGroupProps) => {
-	return <div className='button-group'>{props.children}</div>;
+	return (
+		<Div variants={item} className='button-group'>
+			{props.children}
+		</Div>
+	);
 };
 
-function PollResultsContainer({ pollResults }: PollResultsContainerProps) {
-	const [activeChartIndex, setActiveChartIndex] = useState<number>(0);
-	const [hoverIndex, setHoverIndex] = useState<number>(0);
+type ChartButtonsProps = {
+	activeChartIndex: number;
+	setActiveChartIndex: React.Dispatch<React.SetStateAction<number>>;
+};
 
-	const resetHover = () => setHoverIndex(-1);
+const ChartButtons = React.memo(
+	({ activeChartIndex, setActiveChartIndex }: ChartButtonsProps) => {
+		const [hoverIndex, setHoverIndex] = useState<number>(0);
+		const resetHover = () => setHoverIndex(-1);
+		const buttons = [
+			{ button: FcBarChart, tooltip: 'View Bar Chart' },
+			{ button: FcDoughnutChart, tooltip: 'View Doughnut Chart' },
+		];
 
-	const data: PollResult[] = useMemo(
-		() => formatPollResults(pollResults.Poll_Results),
-		[pollResults.Poll_Results],
-	);
-
-	const buttons = [
-		{ button: FcBarChart, tooltip: 'View Bar Chart' },
-		{ button: FcDoughnutChart, tooltip: 'View Doughnut Chart' },
-	];
-
-	const winner = useMemo(
-		() =>
-			data.length > 0
-				? data.sort((a, b) => b['votes'] - a['votes'])[0]
-				: ({} as PollResult),
-		[data],
-	);
-
-	return (
-		<div className='poll-results-container'>
-			<h3 className='poll-results-header'>
-				<span className='gradient-text'>
-					<span className='double-quotes inverted'>&quot;</span>
-					{winner?.option ?? 'Option'},
-				</span>
-				<span>
-					{' '}
-					It is!
-					<span className='double-quotes'>&quot;</span>
-				</span>
-			</h3>
-
-			<p className='poll-question'>Let&apos;s see what others voted.</p>
-
+		return (
 			<ButtonGroup>
 				{buttons.map(({ button: Button, tooltip }, idx) => (
 					<div
@@ -276,13 +223,62 @@ function PollResultsContainer({ pollResults }: PollResultsContainerProps) {
 					</div>
 				))}
 			</ButtonGroup>
+		);
+	},
+);
 
-			{activeChartIndex === 0 ? (
-				<Barchart data={data} />
-			) : (
-				<Piechart data={data} />
-			)}
-		</div>
+function PollResultsContainer({ pollResults }: PollResultsContainerProps) {
+	const [activeChartIndex, setActiveChartIndex] = useState<number>(0);
+
+	const data: PollResult[] = useMemo(
+		() => formatPollResults(pollResults.Poll_Results),
+		[pollResults.Poll_Results],
+	);
+
+	const winner = useMemo(
+		() =>
+			data.length > 0
+				? data.sort((a, b) => b['votes'] - a['votes'])[0]
+				: ({} as PollResult),
+		[data],
+	);
+
+	return (
+		<Div
+			variants={container}
+			initial='hidden'
+			animate='show'
+			className='poll-results-container'
+		>
+			<H1 variants={item} className='poll-results-header'>
+				<Span className='gradient-text'>
+					<span className='double-quotes inverted'>&quot;</span>
+					{winner?.option ?? 'Option'},
+				</Span>
+				<Span>
+					{' '}
+					It is!
+					<Span className='double-quotes'>&quot;</Span>
+				</Span>
+			</H1>
+
+			<P variants={item} className='poll-question'>
+				Let&apos;s see what others voted.
+			</P>
+
+			<ChartButtons
+				activeChartIndex={activeChartIndex}
+				setActiveChartIndex={setActiveChartIndex}
+			/>
+
+			<Div>
+				{activeChartIndex === 0 ? (
+					<Barchart data={data} />
+				) : (
+					<Piechart data={data} />
+				)}
+			</Div>
+		</Div>
 	);
 }
 
