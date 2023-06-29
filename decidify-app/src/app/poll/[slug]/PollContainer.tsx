@@ -26,10 +26,6 @@ type PollContainerProps = {
 const PollContainer = ({ pollDetails, slug }: PollContainerProps) => {
 	const [isPollOver, setIsPollOver] = useState<boolean>(false);
 
-
-	
-	
-	
 	return (
 		<Div
 			className='poll-container'
@@ -45,7 +41,11 @@ const PollContainer = ({ pollDetails, slug }: PollContainerProps) => {
 					<span>Let&apos;s do this.</span>
 				)}
 			</H1>
-			<P style={{display:isPollOver ? 'none' : 'block'}} variants={item} className='poll-question'>
+			<P
+				style={{ display: isPollOver ? 'none' : 'block' }}
+				variants={item}
+				className='poll-question'
+			>
 				{pollDetails.Poll_Question}
 			</P>
 
@@ -125,7 +125,42 @@ function Poll({
 		markAsVisited(optionsToShow[visitedIndex].index);
 	};
 
+	const setFinalOption = () => {
+		setOptionsToShow((prev) => [prev[clickedIdx!]]);
+		setIsPollOver(true);
+	};
+
 	useEffect(() => {
+		const updateVoteApi = async (errorNotifier: Function) => {
+			if (!optionsToShow[clickedIdx]?.value) return;
+			try {
+				const pollOption = optionsToShow[clickedIdx!].value;
+
+				const res = api.updateVote({
+					Poll_Slug: slug,
+					Poll_Option: pollOption,
+				});
+				const id = await toast.promise(res, {
+					pending: `Voting for ${pollOption}...`,
+				});
+				api.withErrorHandleDo(
+					await res,
+					({ message }: any) => {
+						toast.dismiss(id);
+						toast.info(message ?? 'Voted..', {
+							autoClose: 1000,
+						});
+
+						setFinalOption();
+					},
+					errorNotifier,
+				);
+			} catch (e) {
+				console.error(e);
+				errorNotifier();
+			}
+		};
+
 		if (clickedIdx !== -1) {
 			const randomOption = getRandomOption();
 
@@ -137,22 +172,8 @@ function Poll({
 			} else {
 				const notifyError = () =>
 					toast.error('Something went wrong. Please try again:(');
-				api
-					.updateVote({
-						Poll_Slug: slug,
-						Poll_Option: optionsToShow[clickedIdx]?.value ?? 'Random',
-					})
-					.then((res) => {
-						api.withErrorHandleDo(
-							res,
-							() => {
-								setOptionsToShow((prev) => [prev[clickedIdx]]);
-								setIsPollOver(true);
-							},
-							notifyError,
-						);
-					})
-					.catch(notifyError);
+
+				updateVoteApi(notifyError);
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -176,9 +197,13 @@ function Poll({
 				</>
 			) : (
 				<PollCard
-					style={{fontSize:'1.4rem',marginInline:'25px'}}
+					style={{ fontSize: '1.4rem', marginInline: '25px' }}
 					className='w-100'
-					option={"You've selected " + optionsToShow[0]?.value }
+					option={
+						optionsToShow[0]?.value
+							? "You've selected " + optionsToShow[0]?.value
+							: 'Successfully Voted'
+					}
 				/>
 			)}
 		</Div>
@@ -189,12 +214,12 @@ function PollCard({
 	option,
 	onClick,
 	className,
-	style
+	style,
 }: {
 	option: string;
 	onClick?: (...args: any) => void;
 	className?: string;
-	style?:React.CSSProperties
+	style?: React.CSSProperties;
 }) {
 	return (
 		<Span
