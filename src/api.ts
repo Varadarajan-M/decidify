@@ -33,7 +33,6 @@ const createPoll = async (data: Poll) => {
 			method: 'POST',
 			headers: apiConfig.headers,
 			body: JSON.stringify(data),
-			mode: 'cors',
 		});
 		return res.json();
 	} catch (error: unknown) {
@@ -52,7 +51,6 @@ const updateVote = async (data: UpdateVoteRequest) => {
 			method: 'PUT',
 			headers: apiConfig.headers,
 			body: JSON.stringify(data),
-			mode: 'cors',
 		});
 		return res.json();
 	} catch (error: unknown) {
@@ -64,7 +62,6 @@ const getPollOptions = async (slug: string) => {
 	try {
 		const res = await fetch(`${URLs.GET_POLL_OPTIONS}?slug=${slug}`, {
 			next: { revalidate: 2 },
-			mode: 'cors',
 		});
 		return res.json();
 	} catch (error: unknown) {
@@ -75,7 +72,6 @@ const getPollOptions = async (slug: string) => {
 const getPollResults = async (slug: string) => {
 	try {
 		const res = await fetch(`${URLs.GET_POLL_DETAILS}?slug=${slug}`, {
-			mode: 'cors',
 			headers: {
 				'Cache-Control':
 					'private, no-cache, no-store, max-age=0, must-revalidate',
