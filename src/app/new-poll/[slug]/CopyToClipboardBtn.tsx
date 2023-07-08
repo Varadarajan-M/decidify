@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { BiCopy } from 'react-icons/bi';
 import { TiTick } from 'react-icons/ti';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+
 const copyTextInMobile = (text: string) => {
 	const textArea = document.createElement('textarea');
 	textArea.value = text;
@@ -47,9 +49,7 @@ const CopyToClipboardBtn: React.FC<CopyToClipboardBtnProps> = (
 	return (
 		<motion.button
 			{...props}
-			onClick={() =>
-				copyToClipboard('http://localhost:3000/poll/' + props.text)
-			}
+			onClick={() => copyToClipboard(`${APP_URL}/poll/${props.text}`)}
 			className={`copy-to-clipboard-btn ${copied ? 'copied' : ''}`}
 		>
 			<span>{message}</span>
