@@ -1,5 +1,5 @@
 import '@/styles/pages/new-poll-success.scss';
-import CopyToClipboardBtn from './CopyToClipboardBtn';
+import ShareBtn from './ShareBtn';
 import { Div, H1, P } from '@/app/animations/MotionComponents';
 import { NewPollVariant } from '@/app/animations/variants';
 
@@ -10,6 +10,8 @@ type PageProps = {
 		slug: string;
 	};
 };
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 const NewPollCreatedPage = ({ params }: PageProps) => {
 	const { slug } = params;
@@ -31,14 +33,13 @@ const NewPollCreatedPage = ({ params }: PageProps) => {
 					Share your poll with others and get their opinions!
 				</P>
 
-				<CopyToClipboardBtn
+				<ShareBtn
 					whileTap={{
 						scale: 0.7,
 						transition: { type: 'spring' },
 					}}
-					// whileHover={{ scale: 1.1, transition: { type: 'spring' } }}
 					variants={item}
-					text={slug}
+					url={`${APP_URL}/poll/${slug}`}
 				/>
 			</Div>
 		</section>

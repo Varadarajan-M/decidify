@@ -93,6 +93,7 @@ const Barchart = React.memo(<T,>({ data }: ChartProps<T>) => (
 					fill: 'gray',
 				}}
 				tickCount={6}
+				allowDecimals={false}
 			/>
 			<Bar
 				animationBegin={0}
